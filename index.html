@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flashcard Study App</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f4f7fb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    width: 450px;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.flashcard {
+    width: 100%;
+    height: 220px;
+    perspective: 1000px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.flashcard.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    backface-visibility: hidden;
+    font-size: 1.3rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.card-front {
+    background: #3a45d8;
+    color: white;
+}
+
+.card-back {
+    background: #2ecc71;
+    color: white;
+    transform: rotateY(180deg);
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #34495e;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #2c3e50;
+}
+
+.stats {
+    margin-top: 15px;
+    color: #555;
+    font-weight: bold;
+}
+
+.info {
+    margin-top: 10px;
+    color: #777;
+    font-size: 0.9rem;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Flashcards Website</h1>
+
+    <div class="flashcard" id="flashcard">
+        <div class="card-inner">
+            <div class="card-front" id="question"></div>
+            <div class="card-back" id="answer"></div>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button onclick="prevCard()"><= Previous</button>
+        <button onclick="nextCard()">Next =></button>
+    </div>
+
+    <div class="buttons">
+        <button onclick="editCard()">✏ Edit</button>
+        <button onclick="addCard()">+ Add</button>
+    </div>
+
+    <div class="buttons">
+        <button onclick="markCorrect()" style="background-color: green" >Correct</button>
+        <button onclick="markWrong()" style="background-color: red">Wrong</button>
+    </div>
+
+    <div class="stats" id="stats">
+        Correct: 0 | Wrong: 0
+    </div>
+
+    <div class="info">
+        Click card to flip.<br>
+        Space = Flip | ← → = Navigate | ↑ = Correct | ↓ = Wrong
+    </div>
+</div>
+
+<script>
+const flashcards = [
+{
+    question: "What is the capital of France?",
+    answer: "Paris",
+    correct: 0,
+    wrong: 0
+},
+{
+    question: "What is 5 × 6?",
+    answer: "30",
+    correct: 0,
+    wrong: 0
+},
+{
+    question: "Who wrote Romeo and Juliet?",
+    answer: "William Shakespeare",
+    correct: 0,
+    wrong: 0
+},
+{
+    question: "What planet is known as the Red Planet?",
+    answer: "Mars",
+    correct: 0,
+    wrong: 0
+},
+{
+    question: "How many countries are in Europe?",
+    answer: "44 to 51",
+    correct: 0,
+    wrong: 0
+}
+];
+
+let currentCard = 0;
+
+const flashcard = document.getElementById("flashcard");
+const question = document.getElementById("question");
+const answer = document.getElementById("answer");
+const stats = document.getElementById("stats");
+
+flashcard.addEventListener("click", () => {
+    flashcard.classList.toggle("flipped");
+});
+
+function updateCard() {
+    flashcard.classList.remove("flipped");
+
+    question.textContent = flashcards[currentCard].question;
+    answer.textContent = flashcards[currentCard].answer;
+
+    updateStats();
+}
+
+function updateStats() {
+    stats.textContent =
+        `Correct: ${flashcards[currentCard].correct} | Wrong: ${flashcards[currentCard].wrong}`;
+}
+
+function nextCard() {
+    currentCard = (currentCard + 1) % flashcards.length;
+    updateCard();
+}
+
+function prevCard() {
+    currentCard =
+        (currentCard - 1 + flashcards.length) % flashcards.length;
+    updateCard();
+}
+
+function editCard() {
+    const newQuestion = prompt(
+        "Edit Question:",
+        flashcards[currentCard].question
+    );
+
+    if (newQuestion === null) return;
+
+    const newAnswer = prompt(
+        "Edit Answer:",
+        flashcards[currentCard].answer
+    );
+
+    if (newAnswer === null) return;
+
+    flashcards[currentCard].question = newQuestion;
+    flashcards[currentCard].answer = newAnswer;
+
+    updateCard();
+}
+
+function addCard() {
+    const newQuestion = prompt("Enter the question:");
+
+    if (!newQuestion) return;
+
+    const newAnswer = prompt("Enter the answer:");
+
+    if (!newAnswer) return;
+
+    flashcards.push({
+        question: newQuestion,
+        answer: newAnswer,
+        correct: 0,
+        wrong: 0
+    });
+
+    alert("Flashcard added!");
+}
+
+function markCorrect() {
+    flashcards[currentCard].correct++;
+    updateStats();
+}
+
+function markWrong() {
+    flashcards[currentCard].wrong++;
+    updateStats();
+}
+
+// Keyboard shortcuts
+document.addEventListener("keydown", (e) => {
+    if (e.code === "Space") {
+        e.preventDefault();
+        flashcard.classList.toggle("flipped");
+    }
+
+    if (e.key === "ArrowRight") {
+        nextCard();
+    }
+
+    if (e.key === "ArrowLeft") {
+        prevCard();
+    }
+
+    if (e.key === "ArrowUp") {
+        markCorrect();
+    }
+
+    if (e.key === "ArrowDown") {
+        markWrong();
+    }
+});
+
+updateCard();
+</script>
+
+</body>
+</html>
